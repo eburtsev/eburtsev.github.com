@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: test3 | Eugene Burtsev's blog]]></title>
+  <link href="http://eburtsev.github.com//categories/test3/atom.xml" rel="self"/>
+  <link href="http://eburtsev.github.com/"/>
+  <updated>2012-11-30T00:19:31+04:00</updated>
+  <id>http://eburtsev.github.com/</id>
+  <author>
+    <name><![CDATA[Eugene Burtsev]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  
+  
+</feed>

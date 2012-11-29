@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
+    <url>
+        <loc>http://eburtsev.github.com/en/2012/11/28/test/</loc>
+        <lastmod>2012-11-29T23:06:37+04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://eburtsev.github.com/2012/11/28/test/</loc>
+        <lastmod>2012-11-29T23:06:49+04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://eburtsev.github.com/archives/</loc>
+        <lastmod>2012-11-29T23:58:50+04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://eburtsev.github.com/</loc>
+        <lastmod>2012-11-29T23:06:49+04:00</lastmod>
+    </url>
+</urlset>
