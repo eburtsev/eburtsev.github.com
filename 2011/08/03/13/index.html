@@ -1,121 +1,106 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Eugene Burtsev's blog]]></title>
-  <link href="http://eburtsev.github.com/atom.xml" rel="self"/>
-  <link href="http://eburtsev.github.com/"/>
-  <updated>2012-11-30T23:43:14+04:00</updated>
-  <id>http://eburtsev.github.com/</id>
-  <author>
-    <name><![CDATA[Eugene Burtsev]]></name>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04 - Eugene Burtsev's blog</title>
+  <meta name="author" content="Eugene Burtsev">
+
+  
+  <meta name="description" content="Недавно появилась необходимость установить Mercurial сервер, используя в качестве фронтэнда nginx. В интернете довольно много информации на данную &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://eburtsev.github.com/2011/08/03/13/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Eugene Burtsev's blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-19216537-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Eugene Burtsev's blog</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:eburtsev.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
     
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+      <h1 class="entry-title">Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
 
   
-  
-  <entry>
-    <title type="html"><![CDATA[PrimeFaces tips & tricks]]></title>
-    <link href="http://eburtsev.github.com/2011/10/03/63/"/>
-    <updated>2011-10-03T13:00:00+04:00</updated>
-    <id>http://eburtsev.github.com/2011/10/03/63</id>
-    <content type="html"><![CDATA[<p>В данном посте я постараюсь описать решения типичных проблем возникающих при работе с прекрасной библиотекой JSF компонентов <a href="http://primefaces.org">PrimeFaces</a></p>
-
-<!--more-->
 
 
-<h2>Размер компонентов</h2>
-
-<p>Наверное каждый кто начинал пользоваться библиотекой задавался вопросом &#8220;Почему компоненты выглядят такими огромными, хотя в демо они смотрятся гораздо приличнее?&#8221;. Для решения этой проблемы достаточно добавить внутри тега <code>&lt;h:head&gt;&lt;/h:head&gt;</code> следующий CSS код:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nc">.ui-widget</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">75</span><span class="o">%</span> <span class="cp">!important</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-widget</span> <span class="nc">.ui-widget</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">100</span><span class="o">%</span> <span class="cp">!important</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
+<time datetime="2011-08-03T20:28:00+04:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2011</time>
+        
+      </p>
+    
+  </header>
 
 
-<h2>PrimeFaces и Internet Explorer</h2>
-
-<p>При использовании данной библиотеки в IE могут возникать проблемы с рендерингом, для избавления от которых рекомендуется устанавливать заголовок X-UA-Compatible. В старых версиях библиотеки (до 3.0) это делалось установкой тега meta в начале <code>&lt;h:head&gt;&lt;/h:head&gt;</code>. Однако начиная с версии 3.0 библиотека сначала вставляет свой код в тег head, а уже следом за ним пользовательский. Для того что бы обойти эту проблему в третьей версии был определен facet &#8220;first&#8221;, содержимое которого вставляется в самое начало тега head:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;h:head&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;f:facet</span> <span class="na">name=</span><span class="s">&quot;first&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;EmulateIE8&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Content-Type&quot;</span> <span class="na">content=</span><span class="s">&quot;text/xhtml; charset=UTF-8&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Cache-Control&quot;</span> <span class="na">content=</span><span class="s">&quot;no-cache&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;Pragma&quot;</span> <span class="na">content=</span><span class="s">&quot;no-cache&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;title&gt;&lt;ui:insert</span> <span class="na">name=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>Application Title<span class="nt">&lt;/ui:insert&gt;&lt;/title&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;/f:facet&gt;</span>
-</span><span class='line'><span class="nt">&lt;/h:head&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Вертикальные табы в p:tabView</h2>
-
-<p>Поскольку компоненты библиотеки основаны на jQueryUI, то для создания вертикальных табов можно использовать решение из <a href="http://jquery-ui.googlecode.com/svn/trunk/demos/tabs/vertical.html">этого демо</a>. Во первых необходимо добавить CSS код:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="c">/* Vertical Tabs</span>
-</span><span class='line'><span class="c">----------------------------------*/</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="p">{</span> <span class="k">width</span><span class="o">:</span> <span class="m">55em</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="nc">.ui-tabs-nav</span> <span class="p">{</span> <span class="k">padding</span><span class="o">:</span> <span class="m">.2em</span> <span class="m">.1em</span> <span class="m">.2em</span> <span class="m">.2em</span><span class="p">;</span> <span class="k">float</span><span class="o">:</span> <span class="k">left</span><span class="p">;</span> <span class="k">width</span><span class="o">:</span> <span class="m">12em</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="nc">.ui-tabs-nav</span> <span class="nt">li</span> <span class="p">{</span> <span class="k">clear</span><span class="o">:</span> <span class="k">left</span><span class="p">;</span> <span class="k">width</span><span class="o">:</span> <span class="m">100</span><span class="o">%</span><span class="p">;</span> <span class="k">border-bottom-width</span><span class="o">:</span> <span class="m">1px</span> <span class="cp">!important</span><span class="p">;</span> <span class="k">border-right</span><span class="o">-</span><span class="k">width</span><span class="o">:</span> <span class="m">0</span> <span class="cp">!important</span><span class="p">;</span> <span class="k">margin</span><span class="o">:</span> <span class="m">0</span> <span class="m">-1px</span> <span class="m">.2em</span> <span class="m">0</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="nc">.ui-tabs-nav</span> <span class="nt">li</span> <span class="nt">a</span> <span class="p">{</span> <span class="k">display</span><span class="o">:</span><span class="k">block</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="nc">.ui-tabs-nav</span> <span class="nt">li</span><span class="nc">.ui-tabs-selected</span> <span class="p">{</span> <span class="k">padding-bottom</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span> <span class="k">padding-right</span><span class="o">:</span> <span class="m">.1em</span><span class="p">;</span> <span class="k">border-right</span><span class="o">-</span><span class="k">width</span><span class="o">:</span> <span class="m">1px</span><span class="p">;</span> <span class="k">border-right</span><span class="o">-</span><span class="k">width</span><span class="o">:</span> <span class="m">1px</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="nc">.ui-tabs-vertical</span> <span class="nc">.ui-tabs-panel</span> <span class="p">{</span> <span class="k">padding</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span> <span class="k">float</span><span class="o">:</span> <span class="k">right</span><span class="p">;</span> <span class="k">width</span><span class="o">:</span> <span class="m">40em</span><span class="p">;}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>А во вторых подключить класс к нужному tabView</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;p:tabView</span> <span class="na">styleClass=</span><span class="s">&quot;ui-tabs-vertical&quot;</span> <span class="nt">/&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Данное решение было найдено по мотивам данных вопросов на <a href="http://stackowerflow.com">StackOverflow</a>:
-*   <a href="http://stackoverflow.com/q/6098319/600313">Make tabs appear vertically on the side when using PrimeFaces TabView</a>
-*   <a href="http://stackoverflow.com/q/773074/600313">Vertical Tabs with JQuery?</a></p>
-
-<p>Пока что это все :) При появлении еще каких нибудь заметок, обязуюсь выложить их на всеобщее обозрение.</p>
-]]></content>
-  </entry>
-  
-  
-  
-  
-  
-  <entry>
-    <title type="html"><![CDATA[Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04]]></title>
-    <link href="http://eburtsev.github.com/2011/08/03/13/"/>
-    <updated>2011-08-03T20:28:00+04:00</updated>
-    <id>http://eburtsev.github.com/2011/08/03/13</id>
-    <content type="html"><![CDATA[<p>Недавно появилась необходимость установить Mercurial сервер, используя в качестве фронтэнда nginx. В интернете довольно много информации на данную тему, но пришлось довольно много импровизировать что бы добиться результата. Итак, ниже представлен результат труда по настройке этой связки.</p>
+<div class="entry-content"><p>Недавно появилась необходимость установить Mercurial сервер, используя в качестве фронтэнда nginx. В интернете довольно много информации на данную тему, но пришлось довольно много импровизировать что бы добиться результата. Итак, ниже представлен результат труда по настройке этой связки.</p>
 
 <!--more-->
 
@@ -390,10 +375,144 @@ update-rc.d nginx defaults
 </code></pre>
 
 <p>Все - настройка завершена, можно перезагрузиться и еще раз проверить работу.</p>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Eugene Burtsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-08-03T20:28:00+04:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/hg/'>hg</a>, <a class='category' href='/categories/mercurial/'>mercurial</a>, <a class='category' href='/categories/nginx/'>nginx</a>, <a class='category' href='/categories/python/'>python</a>, <a class='category' href='/categories/ubuntu/'>ubuntu</a>, <a class='category' href='/categories/uwsgi/'>uwsgi</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://eburtsev.github.com/2011/08/03/13/" data-via="" data-counturl="http://eburtsev.github.com/2011/08/03/13/" >Tweet</a>
   
   
+  <div class="g-plusone" data-size="medium"></div>
   
   
-</feed>
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/2011/08/03/13/" title="Next Post: Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04">Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Language</h1>
+  <div class="languages">
+  
+    <a class="language-link" href="/en/2011/08/03/13/">en</a>
+  
+    <a class="language-link" href="/2011/08/03/13/">ru</a>
+  
+  </div>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </ul>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106511780456912280637?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Eugene Burtsev -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
