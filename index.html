@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="В Java 7 появился аналог конструкции using из C# - try-with-resources. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов &hellip;">
+  <meta name="description" content="Недавно пришлось столкнуться с тем что для гугловской библиотеки gdata отсутствуют maven-репозитории. Конечно есть новая библиотека google-api-java- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,59 @@
 
 <div class="blog-index">
   
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/01/29/149/">Google Gdata Maven Repository</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T20:24:00+04:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Недавно пришлось столкнуться с тем что для гугловской библиотеки <a href="http://code.google.com/p/gdata-java-client/">gdata</a> отсутствуют maven-репозитории. Конечно есть новая библиотека <a href="http://code.google.com/p/google-api-java-client/">google-api-java-client</a>, но в ней реализованы не все API, например недостает Provisioning API для доменов.</p>
+
+<p>В поиске было найдено несколько репозиториев, но во всех из них лежат только старые версии библиотеки.</p>
+
+<p>Так же был найден замечательный <a href="https://github.com/dcarter/Google-Data-APIs-Mavenized/network">скрипт</a> для создания локального maven-репозитория.</p>
+
+<p>Поскольку не у всех есть время и возможность создать свой репозиторий (под Windows например у меня этот скрипт запустить так и не получилось), то я решил выложить результаты работы у себя на сервере - вдруг кому-то и сгодится.</p>
+
+<p>Подробности под катом</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/01/29/149/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
+  
+    
   
     
     
@@ -327,24 +380,20 @@
     
       
         <li class="post">
+          <a href="/2012/01/29/149/">Google gdata maven repository</a>
+        </li>
+      
+    
+      
+    
+      
+    
+      
+        <li class="post">
           <a href="/2012/01/13/107/">Поддержка Java 7 try-with-resources в MyBatis</a>
         </li>
       
     
-      
-    
-      
-        <li class="post">
-          <a href="/2012/01/12/100/">Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных</a>
-        </li>
-      
-    
-      
-    
-      
-        <li class="post">
-          <a href="/2011/10/02/63/">PrimeFaces tips & tricks</a>
-        </li>
       
     
   </ul>

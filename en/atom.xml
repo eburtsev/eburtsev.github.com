@@ -4,7 +4,7 @@
   <title><![CDATA[Eugene Burtsev's blog]]></title>
   <link href="http://eburtsev.github.com/en/atom.xml" rel="self"/>
   <link href="http://eburtsev.github.com/en"/>
-  <updated>2012-12-01T00:39:36+04:00</updated>
+  <updated>2012-12-01T01:08:33+04:00</updated>
   <id>http://eburtsev.github.com/en</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
@@ -13,6 +13,92 @@
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
+  
+  
+  
+  <entry>
+    <title type="html"><![CDATA[Google gdata maven repository]]></title>
+    <link href="http://eburtsev.github.com/en/2012/01/29/149/"/>
+    <updated>2012-01-29T20:24:00+04:00</updated>
+    <id>http://eburtsev.github.com/en/2012/01/29/149</id>
+    <content type="html"><![CDATA[<p>Some time ago, I was searching for <a href="http://code.google.com/p/gdata-java-client/">google gdata</a> maven repository, but I was surprised - it has no any maven repositories! Of course, there are a new <a href="http://code.google.com/p/google-api-java-client/">google-api-java-client</a>, , but it do not implements all google API&#8217;s, for example it don&#8217;t implement Provisioning API for domains.</p>
+
+<p>I found some repositories with older versions of library.</p>
+
+<p>Also I found awesome <a href="https://github.com/dcarter/Google-Data-APIs-Mavenized/network">script</a> which helps to create local maven repo for Google&#8217;s gdata library.</p>
+
+<p>I used modified version of this script to create my own repository hosted on my server. I&#8217;ll happy if it will be helpfull for someone.</p>
+
+<p>Details under the cut</p>
+
+<!--more-->
+
+
+<p>How to use:<br/>
+First connect the repository to your <code>pom.xml</code>, such as in the example below:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;repositories&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;repository&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;id&gt;</span>burtsev-net-maven<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;name&gt;</span>Burtsev.Net Maven Repository<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;url&gt;</span>http://maven.burtsev.net<span class="nt">&lt;/url&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/repository&gt;</span>
+</span><span class='line'><span class="nt">&lt;/repositories&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+Also you can use mirror on github:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;repositories&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;repository&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;id&gt;</span>gdata-maven-github<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;name&gt;</span>Google Gdata Maven Repository<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;url&gt;</span>https://raw.github.com/eburtsev/gdata-maven/master/<span class="nt">&lt;/url&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/repository&gt;</span>
+</span><span class='line'><span class="nt">&lt;/repositories&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+And secondly use the dependencies. For example using of Calendar API v2.0:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;dependency&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;groupId&gt;</span>com.google.gdata.gdata-java-client<span class="nt">&lt;/groupId&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;artifactId&gt;</span>gdata-calendar-2.0<span class="nt">&lt;/artifactId&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;version&gt;</span>1.46.0<span class="nt">&lt;/version&gt;</span>
+</span><span class='line'><span class="nt">&lt;/dependency&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+That&#8217;s it:) I hope it is useful to someone:)</p>
+
+<p>P.S. Modified script you can get <a href="https://github.com/eburtsev/Google-Data-APIs-Mavenized">here</a></p>
+
+<p><strong>Upd. 2012-04-24:</strong> Repository has been updated, added gdata libraries v1.47.0<br/>
+<strong>Upd. 2012-08-14:</strong> Repository has been updated, added gdata libraries v1.47.1</p>
+]]></content>
+  </entry>
   
   
   
@@ -409,6 +495,8 @@ In this case, we can catch a nasty exception like this:</p>
 
 ]]></content>
   </entry>
+  
+  
   
   
   
