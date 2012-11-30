@@ -4,7 +4,7 @@
   <title><![CDATA[Eugene Burtsev's blog]]></title>
   <link href="http://eburtsev.github.com/atom.xml" rel="self"/>
   <link href="http://eburtsev.github.com/"/>
-  <updated>2012-11-30T23:43:14+04:00</updated>
+  <updated>2012-11-30T23:58:02+04:00</updated>
   <id>http://eburtsev.github.com/</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
@@ -15,10 +15,117 @@
   
   
   <entry>
+    <title type="html"><![CDATA[Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных]]></title>
+    <link href="http://eburtsev.github.com/2012/01/12/100/"/>
+    <updated>2012-01-12T14:10:00+04:00</updated>
+    <id>http://eburtsev.github.com/2012/01/12/100</id>
+    <content type="html"><![CDATA[<p>Иногда происходит неприятная ситуация когда сервер баз данных уходит в ребут.
+В этом случае можно поймать неприятное исключение такого вида:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Caused by: org.apache.ibatis.exceptions.PersistenceException:
+</span><span class='line'>### Error opening session.  Cause: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>### Cause: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>        at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:8)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSessionFromDataSource(DefaultSqlSessionFactory.java:83)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSession(DefaultSqlSessionFactory.java:32)
+</span><span class='line'>        at com.greytower.htmltemplates.core.dao.ibatis.TemplatesDAOImpl.readAll(TemplatesDAOImpl.java:70)
+</span><span class='line'>        at com.greytower.htmltemplates.beans.TemplatesEditorBean.init(TemplatesEditorBean.java:86)
+</span><span class='line'>        ... 59 more
+</span><span class='line'>Caused by: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransaction.setDesiredAutoCommit(JdbcTransaction.java:51)
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransaction.&lt;init&gt;(JdbcTransaction.java:19)
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory.newTransaction(JdbcTransactionFactory.java:15)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSessionFromDataSource(DefaultSqlSessionFactory.java:78)
+</span><span class='line'>        ... 62 more
+</span><span class='line'>Caused by: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!--more-->
+
+
+<p>Для решения этой проблемы нужно установить свойства poolPingQuery и poolPingEnabled в конфиге iBatis. Например, как это сделано в примере ниже в строках 17 и 18.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span>
+</span><span class='line'><span class="cp">&lt;!DOCTYPE configuration PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot; &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;</span>
+</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;typeAliases&gt;</span>
+</span><span class='line'>      ...
+</span><span class='line'>  <span class="nt">&lt;/typeAliases&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;environments</span> <span class="na">default=</span><span class="s">&quot;development&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">&quot;development&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">&quot;JDBC&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">&quot;POOLED&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;driver&quot;</span> <span class="na">value=</span><span class="s">&quot;${db.driver}&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;url&quot;</span> <span class="na">value=</span><span class="s">&quot;${db.url}&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;username&quot;</span> <span class="na">value=</span><span class="s">&quot;${db.user}&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;password&quot;</span> <span class="na">value=</span><span class="s">&quot;${db.password}&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;poolPingQuery&quot;</span> <span class="na">value=</span><span class="s">&quot;SELECT id FROM user WHERE id = 1&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;poolPingEnabled&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/dataSource&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/environment&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/environments&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  
+  
+  
+  
+  
+  
+  <entry>
     <title type="html"><![CDATA[PrimeFaces tips & tricks]]></title>
-    <link href="http://eburtsev.github.com/2011/10/03/63/"/>
-    <updated>2011-10-03T13:00:00+04:00</updated>
-    <id>http://eburtsev.github.com/2011/10/03/63</id>
+    <link href="http://eburtsev.github.com/2011/10/02/63/"/>
+    <updated>2011-10-02T13:00:00+04:00</updated>
+    <id>http://eburtsev.github.com/2011/10/02/63</id>
     <content type="html"><![CDATA[<p>В данном посте я постараюсь описать решения типичных проблем возникающих при работе с прекрасной библиотекой JSF компонентов <a href="http://primefaces.org">PrimeFaces</a></p>
 
 <!--more-->
@@ -105,8 +212,6 @@
 <p>Пока что это все :) При появлении еще каких нибудь заметок, обязуюсь выложить их на всеобщее обозрение.</p>
 ]]></content>
   </entry>
-  
-  
   
   
   

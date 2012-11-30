@@ -9,7 +9,12 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Below I will describe solutions to common problems occurring working with PrimeFaces JSF components library. ">
+  <meta name="description" content="Sometimes there is an unpleasant situation when the database server goes to reboot.
+In this case, we can catch a nasty exception like this: 1
+2
+3
+4
+5 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -86,7 +91,7 @@
         
   <header>
     
-      <h1 class="entry-title"><a href="/en/2011/10/03/63/">PrimeFaces Tips & Tricks</a></h1>
+      <h1 class="entry-title"><a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the Database Connection Is Temporarily Lost</a></h1>
     
     
       <p class="meta">
@@ -102,7 +107,88 @@
   
 
 
-<time datetime="2011-10-03T13:00:00+04:00" pubdate data-updated="true">Oct 3<span>rd</span>, 2011</time>
+<time datetime="2012-01-12T14:10:00+04:00" pubdate data-updated="true">Jan 12<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Sometimes there is an unpleasant situation when the database server goes to reboot.
+In this case, we can catch a nasty exception like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Caused by: org.apache.ibatis.exceptions.PersistenceException:
+</span><span class='line'>### Error opening session.  Cause: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>### Cause: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>        at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:8)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSessionFromDataSource(DefaultSqlSessionFactory.java:83)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSession(DefaultSqlSessionFactory.java:32)
+</span><span class='line'>        at com.greytower.htmltemplates.core.dao.ibatis.TemplatesDAOImpl.readAll(TemplatesDAOImpl.java:70)
+</span><span class='line'>        at com.greytower.htmltemplates.beans.TemplatesEditorBean.init(TemplatesEditorBean.java:86)
+</span><span class='line'>        ... 59 more
+</span><span class='line'>Caused by: org.apache.ibatis.transaction.TransactionException: Error configuring AutoCommit.  Your driver may not support getAutoCommit() or setAutoCommit(). Requested setting: false.  Cause: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransaction.setDesiredAutoCommit(JdbcTransaction.java:51)
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransaction.&lt;init&gt;(JdbcTransaction.java:19)
+</span><span class='line'>        at org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory.newTransaction(JdbcTransactionFactory.java:15)
+</span><span class='line'>        at org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.openSessionFromDataSource(DefaultSqlSessionFactory.java:78)
+</span><span class='line'>        ... 62 more
+</span><span class='line'>Caused by: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: The last packet successfully received from the server was 59,121,876 milliseconds ago.  The last packet sent successfully to the server was 59,121,984 milliseconds ago. is longer than the server configured value of &#39;wait_timeout&#39;. You should consider either expiring and/or testing connection validity before use in your application, increasing the server configured values for client timeouts, or using the Connector/J connection property &#39;autoReconnect=true&#39; to avoid this problem.
+</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/en/2012/01/12/100/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
+  
+    
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/en/2011/10/02/63/">PrimeFaces Tips & Tricks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-02T13:00:00+04:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2011</time>
         
       </p>
     
@@ -115,7 +201,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/en/2011/10/03/63/">Read on &rarr;</a>
+      <a rel="full-article" href="/en/2011/10/02/63/">Read on &rarr;</a>
     </footer>
   
 
@@ -194,16 +280,18 @@
     
       
         <li class="post">
-          <a href="/en/2011/10/03/63/">PrimeFaces tips & tricks</a>
+          <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
         </li>
-      
-    
       
     
       
         <li class="post">
-          <a href="/en/2011/08/03/13/">Installation of Mercurial + UWSGI + Nginx + HTTPS on Ubuntu Server 10.04</a>
+          <a href="/en/2011/10/02/63/">PrimeFaces tips & tricks</a>
         </li>
+      
+    
+      
+    
       
     
   </ul>
