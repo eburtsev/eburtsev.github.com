@@ -9,11 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Иногда происходит неприятная ситуация когда сервер баз данных уходит в ребут.
-В этом случае можно поймать неприятное исключение такого вида: 1
-2
-3
-4 &hellip;">
+  <meta name="description" content="В Java 7 появился аналог конструкции using из C# - try-with-resources. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +77,60 @@
 
 <div class="blog-index">
   
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/01/13/107/">Поддержка Java 7 Try-with-resources в MyBatis</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-13T10:41:00+04:00" pubdate data-updated="true">Jan 13<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>В Java 7 появился аналог конструкции using из C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов типа коннектов к базам данных и тд. Например так:</p>
+
+<div><script src='https://gist.github.com/1638790.js?file='></script>
+<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
+    // Work with session
+    session.commit();
+}</code></pre></noscript></div>
+
+
+<p>Но вот беда - класс org.apache.ibatis.session.SqlSession из MyBatis 3.0.6 использующегося в проекте не реализует интерфейс AutoCloseable необходимый для того что бы эта конструкция заработала. Надеюсь что в следующей версии поддержку добавят, а пока предлагаю небольшой workaround.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/01/13/107/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
+  
+    
   
     
     
@@ -277,6 +327,14 @@
     
       
         <li class="post">
+          <a href="/2012/01/13/107/">Поддержка Java 7 try-with-resources в MyBatis</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
           <a href="/2012/01/12/100/">Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных</a>
         </li>
       
@@ -284,16 +342,8 @@
       
     
       
-    
-      
         <li class="post">
           <a href="/2011/10/02/63/">PrimeFaces tips & tricks</a>
-        </li>
-      
-    
-      
-        <li class="post">
-          <a href="/2011/08/03/13/">Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04</a>
         </li>
       
     

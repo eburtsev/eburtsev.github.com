@@ -9,12 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Sometimes there is an unpleasant situation when the database server goes to reboot.
-In this case, we can catch a nasty exception like this: 1
-2
-3
-4
-5 &hellip;">
+  <meta name="description" content="With Java 7 came analog of using construction from C# - try-with-resources. This feature is very well for automatically close resources such as &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +77,61 @@ In this case, we can catch a nasty exception like this: 1
 
 <div class="blog-index">
   
+  
+    
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/en/2012/01/13/107/">Java 7 Try-with-resources and MyBatis</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-13T10:41:00+04:00" pubdate data-updated="true">Jan 13<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>With Java 7 came analog of using construction from C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. This feature is very well for automatically close resources such as database connections, etc.
+For example:</p>
+
+<div><script src='https://gist.github.com/1638790.js?file='></script>
+<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
+    // Work with session
+    session.commit();
+}</code></pre></noscript></div>
+
+
+<p>But there are an trouble - class org.apache.ibatis.session.SqlSession from MyBatis 3.0.6 does not implement AutoCloseable interface which is required to work try-with-resources construction. I hope that in next version it will be fixed, but now I can offer small workaround.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/en/2012/01/13/107/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
   
     
   
@@ -280,16 +330,16 @@ In this case, we can catch a nasty exception like this:</p>
     
       
         <li class="post">
-          <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
+          <a href="/en/2012/01/13/107/">Java 7 try-with-resources and MyBatis</a>
         </li>
+      
+    
       
     
       
         <li class="post">
-          <a href="/en/2011/10/02/63/">PrimeFaces tips & tricks</a>
+          <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
         </li>
-      
-    
       
     
       

@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Java 7 try-with-resources and MyBatis - Eugene Burtsev's blog</title>
+  <meta name="author" content="Eugene Burtsev">
+
+  
+  <meta name="description" content="With Java 7 came analog of using construction from C# - try-with-resources. This feature is very well for automatically close resources such as &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://eburtsev.github.com/en/2012/01/13/107/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Eugene Burtsev's blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-19216537-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/en">Eugene Burtsev's blog</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/en/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:eburtsev.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/en">Blog</a></li>
+  <li><a href="/en/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Java 7 Try-with-resources and MyBatis</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-13T10:41:00+04:00" pubdate data-updated="true">Jan 13<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>With Java 7 came analog of using construction from C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. This feature is very well for automatically close resources such as database connections, etc.
+For example:</p>
+
+<div><script src='https://gist.github.com/1638790.js?file='></script>
+<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
+    // Work with session
+    session.commit();
+}</code></pre></noscript></div>
+
+
+<p>But there are an trouble - class org.apache.ibatis.session.SqlSession from MyBatis 3.0.6 does not implement AutoCloseable interface which is required to work try-with-resources construction. I hope that in next version it will be fixed, but now I can offer small workaround.</p>
+
+<!--more-->
+
+
+<p>The first implement a wrapper for SqlSession class implements the interface AutoCloseable:</p>
+
+<div><script src='https://gist.github.com/1638811.js?file='></script>
+<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
+
+import java.io.Closeable;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.executor.BatchResult;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+
+@SuppressWarnings(&quot;rawtypes&quot;)
+public class SqlSession implements org.apache.ibatis.session.SqlSession, Closeable {
+
+    private org.apache.ibatis.session.SqlSession wrappedSession;
+
+    SqlSession(org.apache.ibatis.session.SqlSession wrappedSession) {
+        this.wrappedSession = wrappedSession;
+    }
+
+    @Override
+    public Object selectOne(String statement) {
+        return wrappedSession.selectOne(statement);
+    }
+
+    @Override
+    public Object selectOne(String statement, Object parameter) {
+        return wrappedSession.selectOne(statement, parameter);
+    }
+
+    @Override
+    public List selectList(String statement) {
+        return wrappedSession.selectList(statement);
+    }
+
+    @Override
+    public List selectList(String statement, Object parameter) {
+        return wrappedSession.selectList(statement, parameter);
+    }
+
+    @Override
+    public List selectList(String statement, Object parameter, RowBounds rowBounds) {
+        return wrappedSession.selectList(statement, parameter, rowBounds);
+    }
+
+    @Override
+    public Map selectMap(String statement, String mapKey) {
+        return wrappedSession.selectMap(statement, mapKey);
+    }
+
+    @Override
+    public Map selectMap(String statement, Object parameter, String mapKey) {
+        return wrappedSession.selectMap(statement, parameter, mapKey);
+    }
+
+    @Override
+    public Map selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
+        return wrappedSession.selectMap(statement, parameter, mapKey, rowBounds);
+    }
+
+    @Override
+    public void select(String statement, Object parameter, ResultHandler handler) {
+        wrappedSession.select(statement, parameter, handler);
+    }
+
+    @Override
+    public void select(String statement, ResultHandler handler) {
+        wrappedSession.select(statement, handler);
+    }
+
+    @Override
+    public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+        wrappedSession.select(statement, parameter, rowBounds, handler);
+    }
+
+    @Override
+    public int insert(String statement) {
+        return wrappedSession.insert(statement);
+    }
+
+    @Override
+    public int insert(String statement, Object parameter) {
+        return wrappedSession.insert(statement, parameter);
+    }
+
+    @Override
+    public int update(String statement) {
+        return wrappedSession.update(statement);
+    }
+
+    @Override
+    public int update(String statement, Object parameter) {
+        return wrappedSession.update(statement, parameter);
+    }
+
+    @Override
+    public int delete(String statement) {
+        return wrappedSession.delete(statement);
+    }
+
+    @Override
+    public int delete(String statement, Object parameter) {
+        return wrappedSession.delete(statement, parameter);
+    }
+
+    @Override
+    public void commit() {
+        wrappedSession.commit();
+    }
+
+    @Override
+    public void commit(boolean force) {
+        wrappedSession.commit(force);
+    }
+
+    @Override
+    public void rollback() {
+        wrappedSession.rollback();
+    }
+
+    @Override
+    public void rollback(boolean force) {
+        wrappedSession.rollback(force);
+    }
+
+    @Override
+    public List&lt;BatchResult&gt; flushStatements() {
+        return wrappedSession.flushStatements();
+    }
+
+    @Override
+    public void close() {
+        wrappedSession.close();
+    }
+
+    @Override
+    public void clearCache() {
+        wrappedSession.clearCache();
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return wrappedSession.getConfiguration();
+    }
+
+    @Override
+    public &lt;T&gt; T getMapper(Class&lt;T&gt; type) {
+        return wrappedSession.getMapper(type);
+    }
+
+    @Override
+    public Connection getConnection() {
+        return wrappedSession.getConnection();
+    }
+
+}</code></pre></noscript></div>
+
+
+<p>Also we need write wrapper for SqlSessionFactory class which can work with our custom SqlSession:</p>
+
+<div><script src='https://gist.github.com/1638826.js?file='></script>
+<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
+
+import java.sql.Connection;
+
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.TransactionIsolationLevel;
+
+public class SqlSessionFactory implements org.apache.ibatis.session.SqlSessionFactory {
+
+    private org.apache.ibatis.session.SqlSessionFactory wrappedFactory;
+
+    SqlSessionFactory(org.apache.ibatis.session.SqlSessionFactory wrappedFactory) {
+        this.wrappedFactory = wrappedFactory;
+    }
+
+    @Override
+    public SqlSession openSession() {
+        return new SqlSession(wrappedFactory.openSession());
+    }
+
+    @Override
+    public SqlSession openSession(boolean autoCommit) {
+        return new SqlSession(wrappedFactory.openSession(autoCommit));
+    }
+
+    @Override
+    public SqlSession openSession(Connection connection) {
+        return new SqlSession(wrappedFactory.openSession(connection));
+    }
+
+    @Override
+    public SqlSession openSession(TransactionIsolationLevel level) {
+        return new SqlSession(wrappedFactory.openSession(level));
+    }
+
+    @Override
+    public SqlSession openSession(ExecutorType execType) {
+        return new SqlSession(wrappedFactory.openSession(execType));
+    }
+
+    @Override
+    public SqlSession openSession(ExecutorType execType, boolean autoCommit) {
+        return new SqlSession(wrappedFactory.openSession(execType, autoCommit));
+    }
+
+    @Override
+    public SqlSession openSession(ExecutorType execType, TransactionIsolationLevel level) {
+        return new SqlSession(wrappedFactory.openSession(execType, level));
+    }
+
+    @Override
+    public SqlSession openSession(ExecutorType execType, Connection connection) {
+        return new SqlSession(wrappedFactory.openSession(execType, connection));
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return wrappedFactory.getConfiguration();
+    }
+
+}</code></pre></noscript></div>
+
+
+<p>Below I provide iBatis initialization code. It looks as usual, except the line 18, where we initialize our wrapper.</p>
+
+<div><script src='https://gist.github.com/1638837.js?file='></script>
+<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
+
+import java.io.Reader;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+public final class ConnectionFactory {
+
+    private static SqlSessionFactory sqlSessionFactory;
+    private static Reader reader;
+
+    static {
+        try {
+            reader = Resources.getResourceAsReader(&quot;mybatis-config.xml&quot;);
+
+            if (sqlSessionFactory == null) {
+                sqlSessionFactory = new SqlSessionFactory(new SqlSessionFactoryBuilder().build(reader, Settings.getInstance()));
+                sqlSessionFactory.getConfiguration().addMappers(&quot;net.burtsev.example.dao.mybatis.mappers&quot;);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ConnectionFactory() { }
+
+    public static SqlSessionFactory getSqlSessionFactory() {
+        return sqlSessionFactory;
+    }
+}</code></pre></noscript></div>
+
+
+<p>That&#8217;s all - now we can now enjoy java7 features in our project:)</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Eugene Burtsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-13T10:41:00+04:00" pubdate data-updated="true">Jan 13<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/en/categories/ibatis/'>ibatis</a>, <a class='category' href='/en/categories/java/'>java</a>, <a class='category' href='/en/categories/java7/'>java7</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://eburtsev.github.com/en/2012/01/13/107/" data-via="" data-counturl="http://eburtsev.github.com/en/2012/01/13/107/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/01/12/100/" title="Previous Post: Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных">&laquo; Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/01/13/107/" title="Next Post: Поддержка Java 7 try-with-resources в MyBatis">Поддержка Java 7 try-with-resources в MyBatis &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Language</h1>
+  <div class="languages">
+  
+    <a class="language-link" href="/en/2012/01/13/107/">en</a>
+  
+    <a class="language-link" href="/2012/01/13/107/">ru</a>
+  
+  </div>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </ul>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106511780456912280637?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Eugene Burtsev -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
