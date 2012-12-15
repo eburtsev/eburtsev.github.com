@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Недавно пришлось столкнуться с тем что для гугловской библиотеки gdata отсутствуют maven-репозитории. Конечно есть новая библиотека google-api-java- &hellip;">
+  <meta name="description" content="Совсем недавно открыл для себя Spring Framework и понял, что до этого момента упускал множество возможностей. По это причине решил переписать парочку &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,51 @@
 
 <div class="blog-index">
   
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/05/30/192/">Пример совместной работы JSF2 и Spring Framework</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-30T21:19:00+04:00" pubdate data-updated="true">May 30<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Совсем недавно открыл для себя Spring Framework и понял, что до этого момента упускал множество возможностей. По это причине решил переписать парочку приложений с использованием Spring. Ниже я расскажу как интегрировать Spring и JSF2</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/05/30/192/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
+  
+    
   
     
     
@@ -162,11 +207,15 @@
 
   <div class="entry-content"><p>В Java 7 появился аналог конструкции using из C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов типа коннектов к базам данных и тд. Например так:</p>
 
-<div><script src='https://gist.github.com/1638790.js?file='></script>
-<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
-    // Work with session
-    session.commit();
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">try</span> <span class="o">(</span><span class="n">SqlSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">ConnectionFactory</span><span class="o">.</span><span class="na">getSqlSessionFactory</span><span class="o">().</span><span class="na">openSession</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Work with session</span>
+</span><span class='line'>  <span class="n">session</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Но вот беда - класс org.apache.ibatis.session.SqlSession из MyBatis 3.0.6 использующегося в проекте не реализует интерфейс AutoCloseable необходимый для того что бы эта конструкция заработала. Надеюсь что в следующей версии поддержку добавят, а пока предлагаю небольшой workaround.</p>
@@ -380,7 +429,7 @@
     
       
         <li class="post">
-          <a href="/2012/01/29/149/">Google gdata maven repository</a>
+          <a href="/2012/05/30/192/">Пример совместной работы JSF2 и Spring Framework</a>
         </li>
       
     
@@ -390,7 +439,29 @@
     
       
         <li class="post">
+          <a href="/2012/01/29/149/">Google gdata maven repository</a>
+        </li>
+      
+    
+      
+        <li class="post">
           <a href="/2012/01/13/107/">Поддержка Java 7 try-with-resources в MyBatis</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
+          <a href="/2012/01/12/100/">Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
+          <a href="/2011/10/02/63/">PrimeFaces tips & tricks</a>
         </li>
       
     

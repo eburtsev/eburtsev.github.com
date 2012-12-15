@@ -102,11 +102,15 @@
 
 <div class="entry-content"><p>В Java 7 появился аналог конструкции using из C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов типа коннектов к базам данных и тд. Например так:</p>
 
-<div><script src='https://gist.github.com/1638790.js?file='></script>
-<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
-    // Work with session
-    session.commit();
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">try</span> <span class="o">(</span><span class="n">SqlSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">ConnectionFactory</span><span class="o">.</span><span class="na">getSqlSessionFactory</span><span class="o">().</span><span class="na">openSession</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Work with session</span>
+</span><span class='line'>  <span class="n">session</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Но вот беда - класс org.apache.ibatis.session.SqlSession из MyBatis 3.0.6 использующегося в проекте не реализует интерфейс AutoCloseable необходимый для того что бы эта конструкция заработала. Надеюсь что в следующей версии поддержку добавят, а пока предлагаю небольшой workaround.</p>
@@ -116,267 +120,517 @@
 
 <p>В первую очередь реализуем обертку для класса SqlSession реализующую интерфейс AutoCloseable:</p>
 
-<div><script src='https://gist.github.com/1638811.js?file='></script>
-<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
-
-import java.io.Closeable;
-import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.ibatis.executor.BatchResult;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
-
-@SuppressWarnings(&quot;rawtypes&quot;)
-public class SqlSession implements org.apache.ibatis.session.SqlSession, Closeable {
-
-    private org.apache.ibatis.session.SqlSession wrappedSession;
-
-    SqlSession(org.apache.ibatis.session.SqlSession wrappedSession) {
-        this.wrappedSession = wrappedSession;
-    }
-
-    @Override
-    public Object selectOne(String statement) {
-        return wrappedSession.selectOne(statement);
-    }
-
-    @Override
-    public Object selectOne(String statement, Object parameter) {
-        return wrappedSession.selectOne(statement, parameter);
-    }
-
-    @Override
-    public List selectList(String statement) {
-        return wrappedSession.selectList(statement);
-    }
-
-    @Override
-    public List selectList(String statement, Object parameter) {
-        return wrappedSession.selectList(statement, parameter);
-    }
-
-    @Override
-    public List selectList(String statement, Object parameter, RowBounds rowBounds) {
-        return wrappedSession.selectList(statement, parameter, rowBounds);
-    }
-
-    @Override
-    public Map selectMap(String statement, String mapKey) {
-        return wrappedSession.selectMap(statement, mapKey);
-    }
-
-    @Override
-    public Map selectMap(String statement, Object parameter, String mapKey) {
-        return wrappedSession.selectMap(statement, parameter, mapKey);
-    }
-
-    @Override
-    public Map selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
-        return wrappedSession.selectMap(statement, parameter, mapKey, rowBounds);
-    }
-
-    @Override
-    public void select(String statement, Object parameter, ResultHandler handler) {
-        wrappedSession.select(statement, parameter, handler);
-    }
-
-    @Override
-    public void select(String statement, ResultHandler handler) {
-        wrappedSession.select(statement, handler);
-    }
-
-    @Override
-    public void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
-        wrappedSession.select(statement, parameter, rowBounds, handler);
-    }
-
-    @Override
-    public int insert(String statement) {
-        return wrappedSession.insert(statement);
-    }
-
-    @Override
-    public int insert(String statement, Object parameter) {
-        return wrappedSession.insert(statement, parameter);
-    }
-
-    @Override
-    public int update(String statement) {
-        return wrappedSession.update(statement);
-    }
-
-    @Override
-    public int update(String statement, Object parameter) {
-        return wrappedSession.update(statement, parameter);
-    }
-
-    @Override
-    public int delete(String statement) {
-        return wrappedSession.delete(statement);
-    }
-
-    @Override
-    public int delete(String statement, Object parameter) {
-        return wrappedSession.delete(statement, parameter);
-    }
-
-    @Override
-    public void commit() {
-        wrappedSession.commit();
-    }
-
-    @Override
-    public void commit(boolean force) {
-        wrappedSession.commit(force);
-    }
-
-    @Override
-    public void rollback() {
-        wrappedSession.rollback();
-    }
-
-    @Override
-    public void rollback(boolean force) {
-        wrappedSession.rollback(force);
-    }
-
-    @Override
-    public List&lt;BatchResult&gt; flushStatements() {
-        return wrappedSession.flushStatements();
-    }
-
-    @Override
-    public void close() {
-        wrappedSession.close();
-    }
-
-    @Override
-    public void clearCache() {
-        wrappedSession.clearCache();
-    }
-
-    @Override
-    public Configuration getConfiguration() {
-        return wrappedSession.getConfiguration();
-    }
-
-    @Override
-    public &lt;T&gt; T getMapper(Class&lt;T&gt; type) {
-        return wrappedSession.getMapper(type);
-    }
-
-    @Override
-    public Connection getConnection() {
-        return wrappedSession.getConnection();
-    }
-
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span>SqlSession.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">net</span><span class="o">.</span><span class="na">burtsev</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">dao</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">session</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.Closeable</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.executor.BatchResult</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.Configuration</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.ResultHandler</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.RowBounds</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;rawtypes&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SqlSession</span> <span class="kd">implements</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSession</span><span class="o">,</span> <span class="n">Closeable</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSession</span> <span class="n">wrappedSession</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">SqlSession</span><span class="o">(</span><span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSession</span> <span class="n">wrappedSession</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">wrappedSession</span> <span class="o">=</span> <span class="n">wrappedSession</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Object</span> <span class="nf">selectOne</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span><span class="n">statement</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Object</span> <span class="nf">selectOne</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">List</span> <span class="nf">selectList</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectList</span><span class="o">(</span><span class="n">statement</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">List</span> <span class="nf">selectList</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectList</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">List</span> <span class="nf">selectList</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectList</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">rowBounds</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Map</span> <span class="nf">selectMap</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">String</span> <span class="n">mapKey</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectMap</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">mapKey</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Map</span> <span class="nf">selectMap</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">String</span> <span class="n">mapKey</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectMap</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">mapKey</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Map</span> <span class="nf">selectMap</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">String</span> <span class="n">mapKey</span><span class="o">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">selectMap</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">mapKey</span><span class="o">,</span> <span class="n">rowBounds</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">select</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">ResultHandler</span> <span class="n">handler</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">select</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">handler</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">select</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">ResultHandler</span> <span class="n">handler</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">select</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">handler</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">select</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="o">,</span> <span class="n">ResultHandler</span> <span class="n">handler</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">select</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">,</span> <span class="n">rowBounds</span><span class="o">,</span> <span class="n">handler</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">insert</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="n">statement</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">insert</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">update</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">statement</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">update</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">delete</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="n">statement</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">delete</span><span class="o">(</span><span class="n">String</span> <span class="n">statement</span><span class="o">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="n">statement</span><span class="o">,</span> <span class="n">parameter</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">commit</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">commit</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">force</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">force</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">rollback</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">rollback</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">rollback</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">force</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">rollback</span><span class="o">(</span><span class="n">force</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">BatchResult</span><span class="o">&gt;</span> <span class="n">flushStatements</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">flushStatements</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">clearCache</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">wrappedSession</span><span class="o">.</span><span class="na">clearCache</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Configuration</span> <span class="nf">getConfiguration</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">getConfiguration</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="n">getMapper</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">getMapper</span><span class="o">(</span><span class="n">type</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Connection</span> <span class="nf">getConnection</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedSession</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Также нам понадобится обертка для SqlSessionFactory умеющая работать с нашим классом SqlSession.</p>
 
-<div><script src='https://gist.github.com/1638826.js?file='></script>
-<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
-
-import java.sql.Connection;
-
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.TransactionIsolationLevel;
-
-public class SqlSessionFactory implements org.apache.ibatis.session.SqlSessionFactory {
-
-    private org.apache.ibatis.session.SqlSessionFactory wrappedFactory;
-
-    SqlSessionFactory(org.apache.ibatis.session.SqlSessionFactory wrappedFactory) {
-        this.wrappedFactory = wrappedFactory;
-    }
-
-    @Override
-    public SqlSession openSession() {
-        return new SqlSession(wrappedFactory.openSession());
-    }
-
-    @Override
-    public SqlSession openSession(boolean autoCommit) {
-        return new SqlSession(wrappedFactory.openSession(autoCommit));
-    }
-
-    @Override
-    public SqlSession openSession(Connection connection) {
-        return new SqlSession(wrappedFactory.openSession(connection));
-    }
-
-    @Override
-    public SqlSession openSession(TransactionIsolationLevel level) {
-        return new SqlSession(wrappedFactory.openSession(level));
-    }
-
-    @Override
-    public SqlSession openSession(ExecutorType execType) {
-        return new SqlSession(wrappedFactory.openSession(execType));
-    }
-
-    @Override
-    public SqlSession openSession(ExecutorType execType, boolean autoCommit) {
-        return new SqlSession(wrappedFactory.openSession(execType, autoCommit));
-    }
-
-    @Override
-    public SqlSession openSession(ExecutorType execType, TransactionIsolationLevel level) {
-        return new SqlSession(wrappedFactory.openSession(execType, level));
-    }
-
-    @Override
-    public SqlSession openSession(ExecutorType execType, Connection connection) {
-        return new SqlSession(wrappedFactory.openSession(execType, connection));
-    }
-
-    @Override
-    public Configuration getConfiguration() {
-        return wrappedFactory.getConfiguration();
-    }
-
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span>SqlSessionFactory.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">net</span><span class="o">.</span><span class="na">burtsev</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">dao</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">session</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.Configuration</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.ExecutorType</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.TransactionIsolationLevel</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SqlSessionFactory</span> <span class="kd">implements</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSessionFactory</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSessionFactory</span> <span class="n">wrappedFactory</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">SqlSessionFactory</span><span class="o">(</span><span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">ibatis</span><span class="o">.</span><span class="na">session</span><span class="o">.</span><span class="na">SqlSessionFactory</span> <span class="n">wrappedFactory</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">wrappedFactory</span> <span class="o">=</span> <span class="n">wrappedFactory</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">());</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">autoCommit</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">autoCommit</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">connection</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">TransactionIsolationLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">level</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">ExecutorType</span> <span class="n">execType</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">execType</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">ExecutorType</span> <span class="n">execType</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">autoCommit</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">execType</span><span class="o">,</span> <span class="n">autoCommit</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">ExecutorType</span> <span class="n">execType</span><span class="o">,</span> <span class="n">TransactionIsolationLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">execType</span><span class="o">,</span> <span class="n">level</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">SqlSession</span> <span class="nf">openSession</span><span class="o">(</span><span class="n">ExecutorType</span> <span class="n">execType</span><span class="o">,</span> <span class="n">Connection</span> <span class="n">connection</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSession</span><span class="o">(</span><span class="n">wrappedFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">(</span><span class="n">execType</span><span class="o">,</span> <span class="n">connection</span><span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">Configuration</span> <span class="nf">getConfiguration</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">wrappedFactory</span><span class="o">.</span><span class="na">getConfiguration</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Ну а теперь - магия: конфигурируем iBatis как обычно. Ну почти как обычно, за исключением строки 18, где мы инициализируем нашу обертку.</p>
 
-<div><script src='https://gist.github.com/1638837.js?file='></script>
-<noscript><pre><code>package net.burtsev.example.dao.mybatis.session;
-
-import java.io.Reader;
-
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-
-public final class ConnectionFactory {
-
-    private static SqlSessionFactory sqlSessionFactory;
-    private static Reader reader;
-
-    static {
-        try {
-            reader = Resources.getResourceAsReader(&quot;mybatis-config.xml&quot;);
-
-            if (sqlSessionFactory == null) {
-                sqlSessionFactory = new SqlSessionFactory(new SqlSessionFactoryBuilder().build(reader, Settings.getInstance()));
-                sqlSessionFactory.getConfiguration().addMappers(&quot;net.burtsev.example.dao.mybatis.mappers&quot;);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private ConnectionFactory() { }
-
-    public static SqlSessionFactory getSqlSessionFactory() {
-        return sqlSessionFactory;
-    }
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span>ConnectionFactory.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">net</span><span class="o">.</span><span class="na">burtsev</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">dao</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">session</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.Reader</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.io.Resources</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.ibatis.session.SqlSessionFactoryBuilder</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ConnectionFactory</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="n">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span><span class="o">;</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="n">Reader</span> <span class="n">reader</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">reader</span> <span class="o">=</span> <span class="n">Resources</span><span class="o">.</span><span class="na">getResourceAsReader</span><span class="o">(</span><span class="s">&quot;mybatis-config.xml&quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">if</span> <span class="o">(</span><span class="n">sqlSessionFactory</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="n">sqlSessionFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SqlSessionFactory</span><span class="o">(</span><span class="k">new</span> <span class="n">SqlSessionFactoryBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">(</span><span class="n">reader</span><span class="o">,</span> <span class="n">Settings</span><span class="o">.</span><span class="na">getInstance</span><span class="o">()));</span>
+</span><span class='line'>              <span class="n">sqlSessionFactory</span><span class="o">.</span><span class="na">getConfiguration</span><span class="o">().</span><span class="na">addMappers</span><span class="o">(</span><span class="s">&quot;net.burtsev.example.dao.mybatis.mappers&quot;</span><span class="o">);</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">ConnectionFactory</span><span class="o">()</span> <span class="o">{</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">SqlSessionFactory</span> <span class="nf">getSqlSessionFactory</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">sqlSessionFactory</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Это все, теперь мы можем радоваться фишками java7 в проекте :)</p>
@@ -453,6 +707,16 @@ public final class ConnectionFactory {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
       
     

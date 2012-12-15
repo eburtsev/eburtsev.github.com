@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Some time ago, I was searching for google gdata maven repository, but I was surprised - it has no any maven repositories! Of course, there are a new &hellip;">
+  <meta name="description" content="Just recently I&#8217;ve discovered the Spring Framework. IMHO it is amazing framework. And I decided to rewrite a couple of my applications using &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,51 @@
 
 <div class="blog-index">
   
+  
+    
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/en/2012/05/30/192/">JSF2 + Spring Framework Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-30T21:19:00+04:00" pubdate data-updated="true">May 30<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Just recently I&#8217;ve discovered the Spring Framework. IMHO it is amazing framework. And I decided to rewrite a couple of my applications using Spring. Below I tell how to integrate Spring and JSF2</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/en/2012/05/30/192/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
   
     
   
@@ -165,11 +210,15 @@
   <div class="entry-content"><p>With Java 7 came analog of using construction from C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. This feature is very well for automatically close resources such as database connections, etc.
 For example:</p>
 
-<div><script src='https://gist.github.com/1638790.js?file='></script>
-<noscript><pre><code>try (SqlSession session = ConnectionFactory.getSqlSessionFactory().openSession()) {
-    // Work with session
-    session.commit();
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">try</span> <span class="o">(</span><span class="n">SqlSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">ConnectionFactory</span><span class="o">.</span><span class="na">getSqlSessionFactory</span><span class="o">().</span><span class="na">openSession</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Work with session</span>
+</span><span class='line'>  <span class="n">session</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>But there are an trouble - class org.apache.ibatis.session.SqlSession from MyBatis 3.0.6 does not implement AutoCloseable interface which is required to work try-with-resources construction. I hope that in next version it will be fixed, but now I can offer small workaround.</p>
@@ -383,8 +432,18 @@ In this case, we can catch a nasty exception like this:</p>
     
       
         <li class="post">
+          <a href="/en/2012/05/30/192/">JSF2 + Spring Framework Example</a>
+        </li>
+      
+    
+      
+        <li class="post">
           <a href="/en/2012/01/29/149/">Google gdata maven repository</a>
         </li>
+      
+    
+      
+    
       
     
       
@@ -398,6 +457,14 @@ In this case, we can catch a nasty exception like this:</p>
       
         <li class="post">
           <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
+          <a href="/en/2011/10/02/63/">PrimeFaces tips & tricks</a>
         </li>
       
     
