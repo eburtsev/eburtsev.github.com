@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: python | Eugene Burtsev's blog]]></title>
-  <link href="http://eburtsev.github.com/en//categories/python/atom.xml" rel="self"/>
-  <link href="http://eburtsev.github.com/en"/>
-  <updated>2012-12-15T11:35:22+04:00</updated>
-  <id>http://eburtsev.github.com/</id>
+  <link href="http://burtsev.net/en//categories/python/atom.xml" rel="self"/>
+  <link href="http://burtsev.net/en"/>
+  <updated>2012-12-15T12:07:08+04:00</updated>
+  <id>http://burtsev.net/</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
     

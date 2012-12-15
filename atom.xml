@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Eugene Burtsev's blog]]></title>
-  <link href="http://eburtsev.github.com/atom.xml" rel="self"/>
-  <link href="http://eburtsev.github.com/"/>
-  <updated>2012-12-15T11:35:22+04:00</updated>
-  <id>http://eburtsev.github.com/</id>
+  <link href="http://burtsev.net/atom.xml" rel="self"/>
+  <link href="http://burtsev.net/"/>
+  <updated>2012-12-15T12:07:08+04:00</updated>
+  <id>http://burtsev.net/</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
     
@@ -16,9 +16,9 @@
   
   <entry>
     <title type="html"><![CDATA[Пример совместной работы JSF2 и Spring Framework]]></title>
-    <link href="http://eburtsev.github.com/2012/05/30/192/"/>
+    <link href="http://burtsev.net/2012/05/30/192/"/>
     <updated>2012-05-30T21:19:00+04:00</updated>
-    <id>http://eburtsev.github.com/2012/05/30/192</id>
+    <id>http://burtsev.net/2012/05/30/192</id>
     <content type="html"><![CDATA[<p>Совсем недавно открыл для себя Spring Framework и понял, что до этого момента упускал множество возможностей. По это причине решил переписать парочку приложений с использованием Spring. Ниже я расскажу как интегрировать Spring и JSF2</p>
 
 <!--more-->
@@ -312,8 +312,8 @@
 
 <p>Запускаем, переходим по адресу: <a href="http://localhost:8080/jsf2-spring-example/index.jsf">http://localhost:8080/jsf2-spring-example/index.jsf</a> и видим что все работает :)</p>
 
-<p><a href="http://eburtsev.github.com/downloads/192/test1.png"><img src="http://eburtsev.github.com/downloads/192/test1.png" width="500" height="180" title="'Example #1'" ></a>
-<a href="http://eburtsev.github.com/downloads/192/test2.png"><img src="http://eburtsev.github.com/downloads/192/test2.png" width="500" height="180" title="'Example #2'" ></a></p>
+<p><a href="http://burtsev.net/downloads/192/test1.png"><img src="http://burtsev.net/downloads/192/test1.png" width="500" height="180" title="'Example #1'" ></a>
+<a href="http://burtsev.net/downloads/192/test2.png"><img src="http://burtsev.net/downloads/192/test2.png" width="500" height="180" title="'Example #2'" ></a></p>
 
 <p>P.S. Полный проект можно взять здесь: <a href="https://github.com/eburtsev/jsf2-spring-example">github repository</a></p>
 ]]></content>
@@ -327,9 +327,9 @@
   
   <entry>
     <title type="html"><![CDATA[Google gdata maven repository]]></title>
-    <link href="http://eburtsev.github.com/2012/01/29/149/"/>
+    <link href="http://burtsev.net/2012/01/29/149/"/>
     <updated>2012-01-29T20:24:00+04:00</updated>
-    <id>http://eburtsev.github.com/2012/01/29/149</id>
+    <id>http://burtsev.net/2012/01/29/149</id>
     <content type="html"><![CDATA[<p>Недавно пришлось столкнуться с тем что для гугловской библиотеки <a href="http://code.google.com/p/gdata-java-client/">gdata</a> отсутствуют maven-репозитории. Конечно есть новая библиотека <a href="http://code.google.com/p/google-api-java-client/">google-api-java-client</a>, но в ней реализованы не все API, например недостает Provisioning API для доменов.</p>
 
 <p>В поиске было найдено несколько репозиториев, но во всех из них лежат только старые версии библиотеки.</p>
@@ -413,9 +413,9 @@
   
   <entry>
     <title type="html"><![CDATA[Поддержка Java 7 try-with-resources в MyBatis]]></title>
-    <link href="http://eburtsev.github.com/2012/01/13/107/"/>
+    <link href="http://burtsev.net/2012/01/13/107/"/>
     <updated>2012-01-13T10:41:00+04:00</updated>
-    <id>http://eburtsev.github.com/2012/01/13/107</id>
+    <id>http://burtsev.net/2012/01/13/107</id>
     <content type="html"><![CDATA[<p>В Java 7 появился аналог конструкции using из C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. Данную фишку очень хорошо использовать для автоматического закрытия ресурсов типа коннектов к базам данных и тд. Например так:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -959,9 +959,9 @@
   
   <entry>
     <title type="html"><![CDATA[Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных]]></title>
-    <link href="http://eburtsev.github.com/2012/01/12/100/"/>
+    <link href="http://burtsev.net/2012/01/12/100/"/>
     <updated>2012-01-12T14:10:00+04:00</updated>
-    <id>http://eburtsev.github.com/2012/01/12/100</id>
+    <id>http://burtsev.net/2012/01/12/100</id>
     <content type="html"><![CDATA[<p>Иногда происходит неприятная ситуация когда сервер баз данных уходит в ребут.
 В этом случае можно поймать неприятное исключение такого вида:</p>
 
@@ -1064,9 +1064,9 @@
   
   <entry>
     <title type="html"><![CDATA[PrimeFaces tips & tricks]]></title>
-    <link href="http://eburtsev.github.com/2011/10/02/63/"/>
+    <link href="http://burtsev.net/2011/10/02/63/"/>
     <updated>2011-10-02T13:00:00+04:00</updated>
-    <id>http://eburtsev.github.com/2011/10/02/63</id>
+    <id>http://burtsev.net/2011/10/02/63</id>
     <content type="html"><![CDATA[<p>В данном посте я постараюсь описать решения типичных проблем возникающих при работе с прекрасной библиотекой JSF компонентов <a href="http://primefaces.org">PrimeFaces</a></p>
 
 <!--more-->
@@ -1160,9 +1160,9 @@
   
   <entry>
     <title type="html"><![CDATA[Установка связки Mercurial + UWSGI + Nginx + HTTPS на Ubuntu Server 10.04]]></title>
-    <link href="http://eburtsev.github.com/2011/08/03/13/"/>
+    <link href="http://burtsev.net/2011/08/03/13/"/>
     <updated>2011-08-03T20:28:00+04:00</updated>
-    <id>http://eburtsev.github.com/2011/08/03/13</id>
+    <id>http://burtsev.net/2011/08/03/13</id>
     <content type="html"><![CDATA[<p>Недавно появилась необходимость установить Mercurial сервер, используя в качестве фронтэнда nginx. В интернете довольно много информации на данную тему, но пришлось довольно много импровизировать что бы добиться результата. Итак, ниже представлен результат труда по настройке этой связки.</p>
 
 <!--more-->

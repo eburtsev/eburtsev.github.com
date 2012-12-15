@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Eugene Burtsev's blog]]></title>
-  <link href="http://eburtsev.github.com/en/atom.xml" rel="self"/>
-  <link href="http://eburtsev.github.com/en"/>
-  <updated>2012-12-15T11:35:22+04:00</updated>
-  <id>http://eburtsev.github.com/en</id>
+  <link href="http://burtsev.net/en/atom.xml" rel="self"/>
+  <link href="http://burtsev.net/en"/>
+  <updated>2012-12-15T12:07:08+04:00</updated>
+  <id>http://burtsev.net/en</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
     
@@ -18,9 +18,9 @@
   
   <entry>
     <title type="html"><![CDATA[JSF2 + Spring Framework Example]]></title>
-    <link href="http://eburtsev.github.com/en/2012/05/30/192/"/>
+    <link href="http://burtsev.net/en/2012/05/30/192/"/>
     <updated>2012-05-30T21:19:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2012/05/30/192</id>
+    <id>http://burtsev.net/en/2012/05/30/192</id>
     <content type="html"><![CDATA[<p>Just recently I&#8217;ve discovered the Spring Framework. IMHO it is amazing framework. And I decided to rewrite a couple of my applications using Spring. Below I tell how to integrate Spring and JSF2</p>
 
 <!--more-->
@@ -312,8 +312,8 @@
 
 <p>Run it and follow this link: <a href="http://localhost:8080/jsf2-spring-example/index.jsf">http://localhost:8080/jsf2-spring-example/index.jsf</a> It&#8217;s works! :)</p>
 
-<p><a href="http://eburtsev.github.com/downloads/192/test1.png"><img src="http://eburtsev.github.com/downloads/192/test1.png" width="500" height="180" title="'Example #1'" ></a>
-<a href="http://eburtsev.github.com/downloads/192/test2.png"><img src="http://eburtsev.github.com/downloads/192/test2.png" width="500" height="180" title="'Example #2'" ></a></p>
+<p><a href="http://burtsev.net/downloads/192/test1.png"><img src="http://burtsev.net/downloads/192/test1.png" width="500" height="180" title="'Example #1'" ></a>
+<a href="http://burtsev.net/downloads/192/test2.png"><img src="http://burtsev.net/downloads/192/test2.png" width="500" height="180" title="'Example #2'" ></a></p>
 
 <p>P.S. Full project you can be downloaded from <a href="https://github.com/eburtsev/jsf2-spring-example">my github repository</a></p>
 ]]></content>
@@ -323,9 +323,9 @@
   
   <entry>
     <title type="html"><![CDATA[Google gdata maven repository]]></title>
-    <link href="http://eburtsev.github.com/en/2012/01/29/149/"/>
+    <link href="http://burtsev.net/en/2012/01/29/149/"/>
     <updated>2012-01-29T20:24:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2012/01/29/149</id>
+    <id>http://burtsev.net/en/2012/01/29/149</id>
     <content type="html"><![CDATA[<p>Some time ago, I was searching for <a href="http://code.google.com/p/gdata-java-client/">google gdata</a> maven repository, but I was surprised - it has no any maven repositories! Of course, there are a new <a href="http://code.google.com/p/google-api-java-client/">google-api-java-client</a>, , but it do not implements all google API&#8217;s, for example it don&#8217;t implement Provisioning API for domains.</p>
 
 <p>I found some repositories with older versions of library.</p>
@@ -413,9 +413,9 @@ That&#8217;s it:) I hope it is useful to someone:)</p>
   
   <entry>
     <title type="html"><![CDATA[Java 7 try-with-resources and MyBatis]]></title>
-    <link href="http://eburtsev.github.com/en/2012/01/13/107/"/>
+    <link href="http://burtsev.net/en/2012/01/13/107/"/>
     <updated>2012-01-13T10:41:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2012/01/13/107</id>
+    <id>http://burtsev.net/en/2012/01/13/107</id>
     <content type="html"><![CDATA[<p>With Java 7 came analog of using construction from C# - <a href="http://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>. This feature is very well for automatically close resources such as database connections, etc.
 For example:</p>
 
@@ -960,9 +960,9 @@ For example:</p>
   
   <entry>
     <title type="html"><![CDATA[Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost]]></title>
-    <link href="http://eburtsev.github.com/en/2012/01/12/100/"/>
+    <link href="http://burtsev.net/en/2012/01/12/100/"/>
     <updated>2012-01-12T14:10:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2012/01/12/100</id>
+    <id>http://burtsev.net/en/2012/01/12/100</id>
     <content type="html"><![CDATA[<p>Sometimes there is an unpleasant situation when the database server goes to reboot.
 In this case, we can catch a nasty exception like this:</p>
 
@@ -1065,9 +1065,9 @@ In this case, we can catch a nasty exception like this:</p>
   
   <entry>
     <title type="html"><![CDATA[PrimeFaces tips & tricks]]></title>
-    <link href="http://eburtsev.github.com/en/2011/10/02/63/"/>
+    <link href="http://burtsev.net/en/2011/10/02/63/"/>
     <updated>2011-10-02T13:00:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2011/10/02/63</id>
+    <id>http://burtsev.net/en/2011/10/02/63</id>
     <content type="html"><![CDATA[<p>Below I will describe solutions to common problems occurring working with <a href="http://primefaces.org">PrimeFaces</a> JSF components library.</p>
 
 <!--more-->
@@ -1161,9 +1161,9 @@ This solution based on following questions on <a href="http://stackowerflow.com"
   
   <entry>
     <title type="html"><![CDATA[Installation of Mercurial + UWSGI + Nginx + HTTPS on Ubuntu Server 10.04]]></title>
-    <link href="http://eburtsev.github.com/en/2011/08/03/13/"/>
+    <link href="http://burtsev.net/en/2011/08/03/13/"/>
     <updated>2011-08-03T20:28:00+04:00</updated>
-    <id>http://eburtsev.github.com/en/2011/08/03/13</id>
+    <id>http://burtsev.net/en/2011/08/03/13</id>
     <content type="html"><![CDATA[<p>Some times ago I installed Mercurial server, using as a frontend nginx. Internet has a lot of information about this, but I had to improvise a lot that would achieve a result. So, here is the result of my work.</p>
 
 <!--more-->
