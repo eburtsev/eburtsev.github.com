@@ -4,7 +4,7 @@
   <title><![CDATA[Eugene Burtsev's blog]]></title>
   <link href="http://burtsev.net/atom.xml" rel="self"/>
   <link href="http://burtsev.net/"/>
-  <updated>2012-12-15T12:07:08+04:00</updated>
+  <updated>2012-12-23T23:17:45+04:00</updated>
   <id>http://burtsev.net/</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
@@ -405,7 +405,8 @@
 <p>P.S. Модифицированную версию скрипта можно взять <a href="https://github.com/eburtsev/Google-Data-APIs-Mavenized">здесь</a></p>
 
 <p><strong>Upd. 2012-04-24:</strong> Репозиторий обновлен, добавлены библиотеки версии v1.47.0<br/>
-<strong>Upd. 2012-08-14:</strong> Репозиторий обновлен, добавлены библиотеки версии v1.47.1</p>
+<strong>Upd. 2012-08-14:</strong> Репозиторий обновлен, добавлены библиотеки версии v1.47.1<br/>
+<strong>Upd. 2012-12-23:</strong> В репозиторий добавлены исходники и javadoc&#8217;и</p>
 ]]></content>
   </entry>
   
