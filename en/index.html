@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Just recently I&#8217;ve discovered the Spring Framework. IMHO it is amazing framework. And I decided to rewrite a couple of my applications using &hellip;">
+  <meta name="description" content="I&#8217;ve developed maven plugin to access repositories with custom structure. And I would share this solution with community. Some time ago, I &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,56 @@
 
 <div class="blog-index">
   
+  
+    
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/en/2012/11/10/maven-custom-repository-layout/">Maven Custom Repository Layout</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-10T08:42:00+04:00" pubdate data-updated="true">Nov 10<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&#8217;ve developed maven plugin to access repositories with custom structure. And I would share this solution with community.</p>
+
+<p>Some time ago, I worked on java web project, and I used some JavaScript dependencies for it.
+I&#8217;ve throught about dependency management for javascript dependencies like JQuery. Ordinary JS dependencies is not management, so we need download new versions manually.
+First I found <a href="http://twitter.github.com/bower/">Bower</a> for javascript dependency management, but I afraid of node.js in dependencies for my project. I thought about CDNs which hosts js libraries. (for example jquery on Google CDN: <a href="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js</a>).
+I using maven in my projec, so it will be good to use CDNs via maven&#8230; Because CDN&#8217;s directories stricture is differs from standart maven layout, I decided to write own maven plugin to handle custom repository layout.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/en/2012/11/10/maven-custom-repository-layout/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
   
     
   
@@ -432,18 +482,24 @@ In this case, we can catch a nasty exception like this:</p>
     
       
         <li class="post">
+          <a href="/en/2012/11/10/maven-custom-repository-layout/">Maven custom repository layout</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
           <a href="/en/2012/05/30/192/">JSF2 + Spring Framework Example</a>
         </li>
+      
+    
       
     
       
         <li class="post">
           <a href="/en/2012/01/29/149/">Google gdata maven repository</a>
         </li>
-      
-    
-      
-    
       
     
       
@@ -455,16 +511,10 @@ In this case, we can catch a nasty exception like this:</p>
       
     
       
+    
+      
         <li class="post">
           <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
-        </li>
-      
-    
-      
-    
-      
-        <li class="post">
-          <a href="/en/2011/10/02/63/">PrimeFaces tips & tricks</a>
         </li>
       
     
@@ -492,7 +542,7 @@ In this case, we can catch a nasty exception like this:</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Eugene Burtsev -
+  Copyright &copy; 2013 - Eugene Burtsev -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

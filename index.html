@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="Совсем недавно открыл для себя Spring Framework и понял, что до этого момента упускал множество возможностей. По это причине решил переписать парочку &hellip;">
+  <meta name="description" content="Приветствую всех. Хочу поделиться с сообществом небольшим велосипедом - расширением для мавена позволяющим получать доступ к репозиториям с кастомной &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,55 @@
 
 <div class="blog-index">
   
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/11/10/maven-custom-repository-layout/">Maven Custom Repository Layout</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-10T08:42:00+04:00" pubdate data-updated="true">Nov 10<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Приветствую всех.</p>
+
+<p>Хочу поделиться с сообществом небольшим велосипедом - расширением для мавена позволяющим получать доступ к репозиториям с кастомной структурой.</p>
+
+<p>Для начала расскажу как я до такого докатился. В процессе работы над проектом пришла мысль о том зависимости JavaScript типа JQuery ничем не управляются, и при обновлении приходится качать библиотеки вручную, что совершенно не впечатляет. И вот так появилось дикое желание найти какой-нибудь менеджер зависимостей но для javascript. В первую очередь в своих поисках я наткнулся на <a href="http://twitter.github.com/bower/">Bower</a> но необходимость введения дополнительного шага в процессе сборки отпугивало как node.js в зависимостях. Тут я вспомнил про CDN с коих можно невозбранно тянуть js-библиотеки (например jquery на Google CDN: <a href="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js</a>). Поскольку в проекте используется maven для сборки то логичной мыслью было натравить его на эти залежи библиотек&#8230; Но все оказалось не так просто. Дело в том что структура файловой системы CDN отличается от стандартной для для maven. После 2 часов поиска решения на просторах интернетов найдено не было,и решил я написать свой велосипед. Если я еще не утомил вас то прошу под кат.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/11/10/maven-custom-repository-layout/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
+  
+    
   
     
     
@@ -429,10 +478,16 @@
     
       
         <li class="post">
-          <a href="/2012/05/30/192/">Пример совместной работы JSF2 и Spring Framework</a>
+          <a href="/2012/11/10/maven-custom-repository-layout/">Maven custom repository layout</a>
         </li>
       
     
+      
+    
+      
+        <li class="post">
+          <a href="/2012/05/30/192/">Пример совместной работы JSF2 и Spring Framework</a>
+        </li>
       
     
       
@@ -444,24 +499,18 @@
       
     
       
+    
+      
+    
+      
         <li class="post">
           <a href="/2012/01/13/107/">Поддержка Java 7 try-with-resources в MyBatis</a>
         </li>
       
     
       
-    
-      
         <li class="post">
           <a href="/2012/01/12/100/">Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных</a>
-        </li>
-      
-    
-      
-    
-      
-        <li class="post">
-          <a href="/2011/10/02/63/">PrimeFaces tips & tricks</a>
         </li>
       
     
@@ -491,7 +540,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Eugene Burtsev -
+  Copyright &copy; 2013 - Eugene Burtsev -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

@@ -1,0 +1,505 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Maven custom repository layout - Eugene Burtsev's blog</title>
+  <meta name="author" content="Eugene Burtsev">
+
+  
+  <meta name="description" content="Приветствую всех. Хочу поделиться с сообществом небольшим велосипедом - расширением для мавена позволяющим получать доступ к репозиториям с кастомной &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://burtsev.net/2012/11/10/maven-custom-repository-layout/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Eugene Burtsev's blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-19216537-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Eugene Burtsev's blog</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:burtsev.net" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Maven Custom Repository Layout</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-10T08:42:00+04:00" pubdate data-updated="true">Nov 10<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Приветствую всех.</p>
+
+<p>Хочу поделиться с сообществом небольшим велосипедом - расширением для мавена позволяющим получать доступ к репозиториям с кастомной структурой.</p>
+
+<p>Для начала расскажу как я до такого докатился. В процессе работы над проектом пришла мысль о том зависимости JavaScript типа JQuery ничем не управляются, и при обновлении приходится качать библиотеки вручную, что совершенно не впечатляет. И вот так появилось дикое желание найти какой-нибудь менеджер зависимостей но для javascript. В первую очередь в своих поисках я наткнулся на <a href="http://twitter.github.com/bower/">Bower</a> но необходимость введения дополнительного шага в процессе сборки отпугивало как node.js в зависимостях. Тут я вспомнил про CDN с коих можно невозбранно тянуть js-библиотеки (например jquery на Google CDN: <a href="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js</a>). Поскольку в проекте используется maven для сборки то логичной мыслью было натравить его на эти залежи библиотек&#8230; Но все оказалось не так просто. Дело в том что структура файловой системы CDN отличается от стандартной для для maven. После 2 часов поиска решения на просторах интернетов найдено не было,и решил я написать свой велосипед. Если я еще не утомил вас то прошу под кат.</p>
+
+<!-- more -->
+
+
+<p>В процессе поиска готовых решений было замечено что можно написать расширение для maven обрабатывающее кастомный тип репозиториев. Правда не смотря на то что везде писалось что сделать можно, как это сделать нигде написано не было. Только однажды промелькнуло то что для этой цели служит интерфейс RepositoryConnectorFactory. На скорую руку был набросан простенький класс реализующий данный интерфейс:</p>
+
+<figure class='code'><figcaption><span>CustomRepositoryConnectorFactory.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Component</span><span class="o">(</span><span class="n">role</span> <span class="o">=</span> <span class="n">RepositoryConnectorFactory</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">hint</span> <span class="o">=</span> <span class="s">&quot;custom&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomRepositoryConnectorFactory</span> <span class="kd">implements</span> <span class="n">RepositoryConnectorFactory</span><span class="o">,</span> <span class="n">Service</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">RepositoryConnector</span> <span class="nf">newInstance</span><span class="o">(</span><span class="n">RepositorySystemSession</span> <span class="n">session</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">RemoteRepository</span> <span class="n">repository</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">NoRepositoryConnectorException</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;CustomRepositoryConnectorFactory.newInstance()&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPriority</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initService</span><span class="o">(</span><span class="n">ServiceLocator</span> <span class="n">locator</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Однако после подключения расширения к проекту, чуда не случилось - расширение не вызывалось, а мавен продолжал ругаться на не поддерживаемый тип репозитория. Как в оказалось дальнейшем для правильной работы расширения необходимо сгенерировать описание компонента в файле META-INF/plexus/components.xml. Для создания которого, можно воспользоваться плагином plexus-component-metadata, который распарсит аннотации к классам и создаст этот волшебный файлик.</p>
+
+<figure class='code'><figcaption><span>components.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>    <span class="nt">&lt;plugin&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;groupId&gt;</span>org.codehaus.plexus<span class="nt">&lt;/groupId&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;artifactId&gt;</span>plexus-component-metadata<span class="nt">&lt;/artifactId&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;version&gt;</span>1.5.5<span class="nt">&lt;/version&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;executions&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;execution&gt;</span>
+</span><span class='line'>                            <span class="nt">&lt;goals&gt;</span>
+</span><span class='line'>                                    <span class="nt">&lt;goal&gt;</span>generate-metadata<span class="nt">&lt;/goal&gt;</span>
+</span><span class='line'>                            <span class="nt">&lt;/goals&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;/execution&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/executions&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/plugin&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>После включения генерации components.xml и установки плагина в локальный репозиторий все заработало.</p>
+
+<p>Теперь расскажу как использовать это безобразие. В первую очередь подключаем репозиторий с плагином (пока что я выложил в своем репозитории, в дальнейшем буду думать как поместить в Maven Central):</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;pluginRepositories&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;pluginRepository&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;id&gt;</span>maven-burtsev-net<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;url&gt;</span>http://maven.burtsev.net<span class="nt">&lt;/url&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/pluginRepository&gt;</span>
+</span><span class='line'><span class="nt">&lt;/pluginRepositories&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>И включаем расширение в секции build pom.xml:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;build&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;extensions&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;extension&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;groupId&gt;</span>net.burtsev.maven<span class="nt">&lt;/groupId&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;artifactId&gt;</span>maven-custom-repository-layout<span class="nt">&lt;/artifactId&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;version&gt;</span>1.0<span class="nt">&lt;/version&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/extension&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/extensions&gt;</span>
+</span><span class='line'><span class="nt">&lt;/build&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Подключаем необходимые репозитории, например так:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;repository&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;id&gt;</span>google-cdn<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;url&gt;</span>http://ajax.googleapis.com/ajax/libs/$groupId/$version/$artifactId${classifier(prefix:.)}.$extension<span class="nt">&lt;/url&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;layout&gt;</span>custom<span class="nt">&lt;/layout&gt;</span>
+</span><span class='line'><span class="nt">&lt;/repository&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>В URL репозитория указываются подстановочные символы которые будут заменены на соответствующие параметры для закачиваемого артифакта. Привожу список всех поддерживаемых подстановочных символов:</p>
+
+<ul>
+<li>$groupId</li>
+<li>$artifactId</li>
+<li>$version</li>
+<li>$classifier</li>
+<li>$extension</li>
+</ul>
+
+
+<p>Для параметров значение которых может быть пустым доступен альтернативный синтаксис: <code>${classifier(prefix:.)}</code>. Это сделано для того что бы не дублировать разделители в URL в случае пустого значения параметра.</p>
+
+<p>После подключения репозитория подключаем зависомости например так:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;dependencies&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;dependency&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;groupId&gt;</span>jquery<span class="nt">&lt;/groupId&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;artifactId&gt;</span>jquery<span class="nt">&lt;/artifactId&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;version&gt;</span>1.8.2<span class="nt">&lt;/version&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;classifier&gt;</span>min<span class="nt">&lt;/classifier&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;type&gt;</span>js<span class="nt">&lt;/type&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/dependency&gt;</span>
+</span><span class='line'><span class="nt">&lt;/dependencies&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Для копирования загруженных библиотек в папку веб приложения используем maven-dependency-plugin:</p>
+
+<figure class='code'><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;plugins&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;plugin&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;artifactId&gt;</span>maven-dependency-plugin<span class="nt">&lt;/artifactId&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;executions&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;execution&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;id&gt;</span>copy-dependencies<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;phase&gt;</span>generate-resources<span class="nt">&lt;/phase&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;goals&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;goal&gt;</span>copy-dependencies<span class="nt">&lt;/goal&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;/goals&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;outputDirectory&gt;</span>${project.build.directory}/${project.build.finalName}/js<span class="nt">&lt;/outputDirectory&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;includeArtifactIds&gt;</span>jquery<span class="nt">&lt;/includeArtifactIds&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;includeTypes&gt;</span>js<span class="nt">&lt;/includeTypes&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;/configuration&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/execution&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/executions&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/plugin&gt;</span>
+</span><span class='line'><span class="nt">&lt;/plugins&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Собственно все. Проблема решена - мы добились возможности рулить JS зависимостями с помощью maven.</p>
+
+<p>Исходные коды плагина можно найти здесь: <a href="https://bitbucket.org/eburtsev/maven-custom-repository-layout">https://bitbucket.org/eburtsev/maven-custom-repository-layout</a>
+Сам плагин можно использовать напрямую из моего репозитория maven: <a href="http://maven.burtsev.net/">http://maven.burtsev.net/</a>
+Пример проекта с использованием описываемого расширения <a href="https://bitbucket.org/eburtsev/test-javascript-dependencies">https://bitbucket.org/eburtsev/test-javascript-dependencies</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Eugene Burtsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-10T08:42:00+04:00" pubdate data-updated="true">Nov 10<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/java/'>java</a>, <a class='category' href='/categories/maven/'>maven</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://burtsev.net/2012/11/10/maven-custom-repository-layout/" data-via="" data-counturl="http://burtsev.net/2012/11/10/maven-custom-repository-layout/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/05/30/192/" title="Previous Post: Пример совместной работы JSF2 и Spring Framework">&laquo; Пример совместной работы JSF2 и Spring Framework</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/11/10/maven-custom-repository-layout/" title="Next Post: Maven custom repository layout">Maven custom repository layout &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Language</h1>
+  <div class="languages">
+  
+    <a class="language-link" href="/en/2012/11/10/maven-custom-repository-layout/">en</a>
+  
+    <a class="language-link" href="/2012/11/10/maven-custom-repository-layout/">ru</a>
+  
+  </div>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </ul>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106511780456912280637?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Eugene Burtsev -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'burtsevnet';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://burtsev.net/2012/11/10/maven-custom-repository-layout/';
+        var disqus_url = 'http://burtsev.net/2012/11/10/maven-custom-repository-layout/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
