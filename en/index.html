@@ -9,7 +9,7 @@
   <meta name="author" content="Eugene Burtsev">
 
   
-  <meta name="description" content="I&#8217;ve developed maven plugin to access repositories with custom structure. And I would share this solution with community. Some time ago, I &hellip;">
+  <meta name="description" content="Some time ago I had some projects which I wanted to combine in one big project and keep history for all of them. This can be done following to this &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,103 @@
 
 <div class="blog-index">
   
+  
+    
+  
+    
+    
+      <article>
+        
+  <header>
+    
+      <h1 class="entry-title"><a href="/en/2013/03/27/merging-unrelated-repositories-in-mercurial/">Merging Unrelated Repositories in Mercurial</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-27T21:46:00+04:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Some time ago I had some projects which I wanted to combine in one big project and keep history for all of them. This can be done following to <a href="http://mercurial.selenic.com/wiki/MergingUnrelatedRepositories">this article</a>. But if I&#8217;ll use this solution in result I&#8217;ll have more than one tails (how it illustrated in picture below).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   .           .
+</span><span class='line'>   .           .
+</span><span class='line'>   |           |
+</span><span class='line'>   o           o
+</span><span class='line'>  tail        tail
+</span><span class='line'>   #1          #2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But I wanted to make repository structure as on picture below:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   . default   .
+</span><span class='line'>   .           . Feature
+</span><span class='line'>   |           | branch
+</span><span class='line'>   o           o
+</span><span class='line'>   |           |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |
+</span><span class='line'>   o</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After some hours with console magic I found solution, and I want to share it.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/en/2013/03/27/merging-unrelated-repositories-in-mercurial/">Read on &rarr;</a>
+    </footer>
+  
+
+
+      </article>
+    
   
     
   
@@ -482,6 +579,14 @@ In this case, we can catch a nasty exception like this:</p>
     
       
         <li class="post">
+          <a href="/en/2013/03/27/merging-unrelated-repositories-in-mercurial/">Merging unrelated repositories in mercurial</a>
+        </li>
+      
+    
+      
+    
+      
+        <li class="post">
           <a href="/en/2012/11/10/maven-custom-repository-layout/">Maven custom repository layout</a>
         </li>
       
@@ -503,18 +608,10 @@ In this case, we can catch a nasty exception like this:</p>
       
     
       
+    
+      
         <li class="post">
           <a href="/en/2012/01/13/107/">Java 7 try-with-resources and MyBatis</a>
-        </li>
-      
-    
-      
-    
-      
-    
-      
-        <li class="post">
-          <a href="/en/2012/01/12/100/">Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost</a>
         </li>
       
     

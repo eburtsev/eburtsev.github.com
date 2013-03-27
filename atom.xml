@@ -4,7 +4,7 @@
   <title><![CDATA[Eugene Burtsev's blog]]></title>
   <link href="http://burtsev.net/atom.xml" rel="self"/>
   <link href="http://burtsev.net/"/>
-  <updated>2013-03-26T10:34:43+04:00</updated>
+  <updated>2013-03-28T00:04:14+04:00</updated>
   <id>http://burtsev.net/</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
@@ -12,6 +12,198 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  
+  <entry>
+    <title type="html"><![CDATA[Объединение истории репозиториев Mercurial]]></title>
+    <link href="http://burtsev.net/2013/03/27/merging-unrelated-repositories-in-mercurial/"/>
+    <updated>2013-03-27T21:46:00+04:00</updated>
+    <id>http://burtsev.net/2013/03/27/merging-unrelated-repositories-in-mercurial</id>
+    <content type="html"><![CDATA[<p>Жил-был один проект. Жил он тихо мирно в своем репозитории и постепенно обзаводился друзьями-проектами, жившими в своих репозиториях. И вот захотели они сьехать на одну квартиру, дабы экономить на квартплате и чаще видеться друг с другом, и позвали девелопера что бы он им помог.</p>
+
+<p>Вот такая вот сказочка. Собственно задача такова: создать родительский проект maven содержащий историю всех подпроектов, находившихся ранее в отдельных репозиториях. В принципе это очень просто делается по <a href="http://mercurial.selenic.com/wiki/MergingUnrelatedRepositories">этой инструкции</a>. Но если следовать данной инструкции у репозитория получится несколько хвостов (как на рисунке ниже).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   .           .
+</span><span class='line'>   .           .
+</span><span class='line'>   |           |
+</span><span class='line'>   o           o
+</span><span class='line'>  tail        tail
+</span><span class='line'>   #1          #2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Мне бы хотелось видеть историю в виде примерно такого графа:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   . default   .
+</span><span class='line'>   .           . Feature
+</span><span class='line'>   |           | branch
+</span><span class='line'>   o           o
+</span><span class='line'>   |           |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |
+</span><span class='line'>   o</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Перфекционист во мне не удовлетворился таким положением дел, и в итоге, после пары часов консольной магии, было найдено следующее решение.</p>
+
+<!--more-->
+
+
+<p>Сделаем ход конем и изменим историю так что бы было похоже на то что изначально разработка велась в подпапках основного репозитория. Это необходимо для того, что бы исключить конфликты файлов при последующем слиянии. Что бы провернуть это, экспортируем патч и изменим пути файлов. (Здесь и далее я буду считать что все репозитории находятся на одном уровне в файловой системе)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">PROJECT</span><span class="o">=</span>project1
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Для каждого из проектов делаем тоже самое (достаточно поменять только переменную <code>PROJECT</code> в начале скрипта)</p>
+
+<p>Если вместо того что бы плодить безымянные ветки вы захотите разнести историю отдельных проетов по именованым веткам, то достаточно для всех проектов кроме первого выполнить следующие команды, для добавления информации об имени ветки в патч:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">BRANCH</span><span class="o">=</span><span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span> branch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/# Date \(.*\)/# Date \1\n# Branch $BRANCH/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>После того как мы создали патчи для каждого из проектов, сольем их в один. В первую очередь инициализируем новый репозиторий агрегирующий историю всех проектов.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg init combined
+</span><span class='line'>hg import ../project1/project1.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Для всех остальных проектов делаем следующие махинации:</p>
+
+<ol>
+<li>Обновляем репозиторий до ревизии из которой будет начинаться проект</li>
+<li>Импортируем соответствующий патч (Если было указано имя бранча то не стоит забывать про ключ <code>--import-branch</code>)</li>
+<li>Мержим ветки</li>
+<li>Повторяем для оставшихся патчей</li>
+</ol>
+
+
+<p>Этот подход проиллюстрирован ниже. Для способа без использования именованых веток действий нужно сделать немного меньше и в принципе можно легко автоматизировать процесс:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg merge
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Если же использовались именованые ветки то стоит делать так:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg up &lt;latest-patch-revision&gt; <span class="c"># переходим на последнюю ревизию импортированного проекта</span>
+</span><span class='line'>hg commit --close-branch
+</span><span class='line'>hg up default
+</span><span class='line'>hg merge &lt;latest-patch-revision&gt;
+</span><span class='line'>hg commit -m <span class="s2">&quot;Merge&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>По мотивам данной статьи был создан скрипт:</p>
+
+<figure class='code'><figcaption><span>modify-patch.sh </span><a href='http://burtsev.net/downloads/merging-unrelated-repositories-in-mercurial/modify-patch.sh'>Download</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">PROJECT</span><span class="o">=</span><span class="nv">$1</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">pushd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="nb">popd</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Буду рад если кому нибудь поможет эта статья. Замечания приветствуются.</p>
+]]></content>
+  </entry>
+  
+  
+  
   
   
   <entry>
@@ -650,8 +842,6 @@
   
   
   
-  
-  
   <entry>
     <title type="html"><![CDATA[Поддержка Java 7 try-with-resources в MyBatis]]></title>
     <link href="http://burtsev.net/2012/01/13/107/"/>
@@ -1196,6 +1386,10 @@
   
   
   
+  
+  
+  
+  
   <entry>
     <title type="html"><![CDATA[Обход исключения org.apache.ibatis.transaction. TransactionException в iBATIS при временной недоступности сервера баз данных]]></title>
     <link href="http://burtsev.net/2012/01/12/100/"/>
@@ -1392,8 +1586,6 @@
 <p>Пока что это все :) При появлении еще каких нибудь заметок, обязуюсь выложить их на всеобщее обозрение.</p>
 ]]></content>
   </entry>
-  
-  
   
   
   

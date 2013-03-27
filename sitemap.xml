@@ -57,11 +57,19 @@
         <lastmod>2013-03-26T10:34:39+04:00</lastmod>
     </url>
     <url>
+        <loc>http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/</loc>
+        <lastmod>2013-03-28T00:03:51+04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://burtsev.net/2013/03/27/merging-unrelated-repositories-in-mercurial/</loc>
+        <lastmod>2013-03-27T23:23:53+04:00</lastmod>
+    </url>
+    <url>
         <loc>http://burtsev.net/archives/</loc>
-        <lastmod>2013-03-26T10:34:39+04:00</lastmod>
+        <lastmod>2013-03-28T00:03:51+04:00</lastmod>
     </url>
     <url>
         <loc>http://burtsev.net/</loc>
-        <lastmod>2013-03-26T10:34:39+04:00</lastmod>
+        <lastmod>2013-03-28T00:03:51+04:00</lastmod>
     </url>
 </urlset>

@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Merging unrelated repositories in mercurial - Eugene Burtsev's blog</title>
+  <meta name="author" content="Eugene Burtsev">
+
+  
+  <meta name="description" content="Some time ago I had some projects which I wanted to combine in one big project and keep history for all of them. This can be done following to this &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Eugene Burtsev's blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-19216537-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/en">Eugene Burtsev's blog</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/en/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:burtsev.net" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/en">Blog</a></li>
+  <li><a href="/en/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Merging Unrelated Repositories in Mercurial</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-27T21:46:00+04:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Some time ago I had some projects which I wanted to combine in one big project and keep history for all of them. This can be done following to <a href="http://mercurial.selenic.com/wiki/MergingUnrelatedRepositories">this article</a>. But if I&#8217;ll use this solution in result I&#8217;ll have more than one tails (how it illustrated in picture below).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   .           .
+</span><span class='line'>   .           .
+</span><span class='line'>   |           |
+</span><span class='line'>   o           o
+</span><span class='line'>  tail        tail
+</span><span class='line'>   #1          #2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But I wanted to make repository structure as on picture below:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   . default   .
+</span><span class='line'>   .           . Feature
+</span><span class='line'>   |           | branch
+</span><span class='line'>   o           o
+</span><span class='line'>   |           |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |
+</span><span class='line'>   o</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After some hours with console magic I found solution, and I want to share it.</p>
+
+<!--more-->
+
+
+<p>I decided to modify history to avoid possible merge conflicts. I moved all files in each project to appropriate subfolder (named as project). To do this we needs to export patch and modify it to change pathes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">PROJECT</span><span class="o">=</span>project1
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For each of projects we need to make some steps (enough to change <code>PROJECT</code> variable)</p>
+
+<p>If you want move projects to named branches instead of multiply default branches you needs prepare following commands which adds branch name information to patch:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">BRANCH</span><span class="o">=</span><span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span> branch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/# Date \(.*\)/# Date \1\n# Branch $BRANCH/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we have patches made from all projects we can combine them. First initialize aggregate repository and import oldest project of all.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg init combined
+</span><span class='line'>hg import ../project1/project1.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For other project we need do following steps:</p>
+
+<ol>
+<li>Update aggregate project to revision which will be parent for appropriate project</li>
+<li>Import patch (don&#8217;t forget <code>--import-branch</code> key if you using named branches)</li>
+<li>Merge branches</li>
+<li>Repeat it for other patches</li>
+</ol>
+
+
+<p>This approach illustrated below. If you not using named branches you can use these simple steps:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg merge
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you using named branches your way will more complicated:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg up &lt;latest-patch-revision&gt; <span class="c"># update to latest revision of imported project</span>
+</span><span class='line'>hg commit --close-branch
+</span><span class='line'>hg up default
+</span><span class='line'>hg merge &lt;latest-patch-revision&gt;
+</span><span class='line'>hg commit -m <span class="s2">&quot;Merge&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&#8217;ve created script which can help to automate first part of this article:</p>
+
+<figure class='code'><figcaption><span>modify-patch.sh </span><a href='http://burtsev.net/downloads/merging-unrelated-repositories-in-mercurial/modify-patch.sh'>Download</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">PROJECT</span><span class="o">=</span><span class="nv">$1</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">pushd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="nb">popd</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&#8217;ll glad if this article will useful for someone. Comments are welcome.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Eugene Burtsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-27T21:46:00+04:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/en/categories/hg/'>hg</a>, <a class='category' href='/en/categories/mercurial/'>mercurial</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/" data-via="" data-counturl="http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/11/10/maven-custom-repository-layout/" title="Previous Post: Maven custom repository layout">&laquo; Maven custom repository layout</a>
+      
+      
+        <a class="basic-alignment right" href="/2013/03/27/merging-unrelated-repositories-in-mercurial/" title="Next Post: Объединение истории репозиториев Mercurial">Объединение истории репозиториев Mercurial &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Language</h1>
+  <div class="languages">
+  
+    <a class="language-link" href="/en/2013/03/27/merging-unrelated-repositories-in-mercurial/">en</a>
+  
+    <a class="language-link" href="/2013/03/27/merging-unrelated-repositories-in-mercurial/">ru</a>
+  
+  </div>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </ul>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106511780456912280637?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Eugene Burtsev -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'burtsevnet';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/';
+        var disqus_url = 'http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

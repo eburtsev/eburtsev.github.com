@@ -4,7 +4,7 @@
   <title><![CDATA[Eugene Burtsev's blog]]></title>
   <link href="http://burtsev.net/en/atom.xml" rel="self"/>
   <link href="http://burtsev.net/en"/>
-  <updated>2013-03-26T10:34:43+04:00</updated>
+  <updated>2013-03-28T00:04:14+04:00</updated>
   <id>http://burtsev.net/en</id>
   <author>
     <name><![CDATA[Eugene Burtsev]]></name>
@@ -12,6 +12,196 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  
+  
+  
+  <entry>
+    <title type="html"><![CDATA[Merging unrelated repositories in mercurial]]></title>
+    <link href="http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial/"/>
+    <updated>2013-03-27T21:46:00+04:00</updated>
+    <id>http://burtsev.net/en/2013/03/27/merging-unrelated-repositories-in-mercurial</id>
+    <content type="html"><![CDATA[<p>Some time ago I had some projects which I wanted to combine in one big project and keep history for all of them. This can be done following to <a href="http://mercurial.selenic.com/wiki/MergingUnrelatedRepositories">this article</a>. But if I&#8217;ll use this solution in result I&#8217;ll have more than one tails (how it illustrated in picture below).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   .           .
+</span><span class='line'>   .           .
+</span><span class='line'>   |           |
+</span><span class='line'>   o           o
+</span><span class='line'>  tail        tail
+</span><span class='line'>   #1          #2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But I wanted to make repository structure as on picture below:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   @
+</span><span class='line'>   |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |           |
+</span><span class='line'>   . default   .
+</span><span class='line'>   .           . Feature
+</span><span class='line'>   |           | branch
+</span><span class='line'>   o           o
+</span><span class='line'>   |           |
+</span><span class='line'>   o-----------o
+</span><span class='line'>   |
+</span><span class='line'>   o</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After some hours with console magic I found solution, and I want to share it.</p>
+
+<!--more-->
+
+
+<p>I decided to modify history to avoid possible merge conflicts. I moved all files in each project to appropriate subfolder (named as project). To do this we needs to export patch and modify it to change pathes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">PROJECT</span><span class="o">=</span>project1
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For each of projects we need to make some steps (enough to change <code>PROJECT</code> variable)</p>
+
+<p>If you want move projects to named branches instead of multiply default branches you needs prepare following commands which adds branch name information to patch:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">BRANCH</span><span class="o">=</span><span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span> branch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/# Date \(.*\)/# Date \1\n# Branch $BRANCH/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we have patches made from all projects we can combine them. First initialize aggregate repository and import oldest project of all.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg init combined
+</span><span class='line'>hg import ../project1/project1.patch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For other project we need do following steps:</p>
+
+<ol>
+<li>Update aggregate project to revision which will be parent for appropriate project</li>
+<li>Import patch (don&#8217;t forget <code>--import-branch</code> key if you using named branches)</li>
+<li>Merge branches</li>
+<li>Repeat it for other patches</li>
+</ol>
+
+
+<p>This approach illustrated below. If you not using named branches you can use these simple steps:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg merge
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you using named branches your way will more complicated:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>hg up &lt;parent-revision&gt;
+</span><span class='line'>hg import ../project1/project1.patch --import-branch
+</span><span class='line'>hg up &lt;latest-patch-revision&gt; <span class="c"># update to latest revision of imported project</span>
+</span><span class='line'>hg commit --close-branch
+</span><span class='line'>hg up default
+</span><span class='line'>hg merge &lt;latest-patch-revision&gt;
+</span><span class='line'>hg commit -m <span class="s2">&quot;Merge&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&#8217;ve created script which can help to automate first part of this article:</p>
+
+<figure class='code'><figcaption><span>modify-patch.sh </span><a href='http://burtsev.net/downloads/merging-unrelated-repositories-in-mercurial/modify-patch.sh'>Download</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">PROJECT</span><span class="o">=</span><span class="nv">$1</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">pushd</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>
+</span><span class='line'>
+</span><span class='line'>hg <span class="nb">export</span> -r0:tip -o <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="c"># Modify patch (Move all files to subdirectory)</span>
+</span><span class='line'>
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/\(diff -r [0-9a-f]* -r [0-9a-f]*\) \(.*\)/\1 ${PROJECT}\/\2/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/--- a/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>sed -i.bak -e <span class="s2">&quot;s/+++ b/\0\/${PROJECT}/g&quot;</span> <span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.patch
+</span><span class='line'>
+</span><span class='line'><span class="nb">popd</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&#8217;ll glad if this article will useful for someone. Comments are welcome.</p>
+]]></content>
+  </entry>
+  
   
   
   
@@ -649,6 +839,8 @@ That&#8217;s it:) I hope it is useful to someone:)</p>
   
   
   
+  
+  
   <entry>
     <title type="html"><![CDATA[Java 7 try-with-resources and MyBatis]]></title>
     <link href="http://burtsev.net/en/2012/01/13/107/"/>
@@ -1194,10 +1386,6 @@ For example:</p>
   
   
   
-  
-  
-  
-  
   <entry>
     <title type="html"><![CDATA[Prevent iBatis org.apache.ibatis.transaction. TransactionException if the database connection is temporarily lost]]></title>
     <link href="http://burtsev.net/en/2012/01/12/100/"/>
@@ -1394,6 +1582,8 @@ This solution based on following questions on <a href="http://stackowerflow.com"
 *   <a href="http://stackoverflow.com/q/773074/600313">Vertical Tabs with JQuery?</a></p>
 ]]></content>
   </entry>
+  
+  
   
   
   
